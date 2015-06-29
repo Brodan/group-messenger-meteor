@@ -36,6 +36,9 @@ if (Meteor.isClient) {
       event.target.number.value = "";
       // Prevent default form submit
       return false;
+    },
+    "click .text-blast": function(){
+      Meteor.call("textBlast");
     }
   });
 
@@ -114,6 +117,17 @@ Meteor.methods({
     Groups.update({ _id:groupId, "numbers.number":number},
       { $set: {"numbers.$.checked": setChecked}}
     );
+  },
+  textBlast: function(){
+    var phonebook = [];
+    var recipients = Groups.find({owner: this.userId, numbers: { $elemMatch: {"checked": true}}});
+    recipients.forEach(function(recipient){
+      for(var index in recipient.numbers){
+        //console.log(recipient.numbers[number].number);
+        phonebook.push(recipient.numbers[index].number);
+      }
+    });
+    console.log(phonebook);
   }
 });
 
