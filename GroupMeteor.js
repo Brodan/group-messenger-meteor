@@ -12,7 +12,6 @@ if (Meteor.isClient) {
     }
   });
 
-
   Template.body.events({
     "submit .new-group": function (event) {
       // Grab value from text field
@@ -40,22 +39,23 @@ if (Meteor.isClient) {
     }
   });
 
-
   Template.group.events({
     "click .toggle-checked-group": function () {
       // Set the checked property to the opposite of its current value
       Meteor.call("setCheckedGroup", this._id, ! this.checked);
     },
-    // "click .toggle-checked-number": function () {
-    //   // Set the checked property to the opposite of its current value
-    //   Meteor.call("setCheckedNumber", this);
-    // },
+    "click .toggle-checked-number": function () {
+      // Set the checked property to the opposite of its current value
+      var data = Template.instance().data;
+      Meteor.call("setCheckedNumber", data._id, this.number, ! this.checked);
+    },
     "click .delete": function () {
       Meteor.call("deleteGroup", this._id);
     },
-    // "click .deleteNumber": function () {
-    //   Meteor.call("deleteNumber", this);
-    // }
+    "click .deleteNumber": function () {
+      var data = Template.instance().data;
+      Meteor.call("deleteNumber", data._id, this.number);
+    }
   });
 
   // At the bottom of the client code
@@ -85,24 +85,36 @@ Meteor.methods({
       throw new Meteor.Error("not-authorized");
     }
 
-    Groups.update(group._id, {$addToSet: {numbers: {"number":newNumber, "checked": true }}})
+    Groups.update({_id:group._id}, {$addToSet: {numbers: {"number":newNumber, "checked": true }}})
 
   },
   deleteGroup: function (groupId) {
-    Groups.remove(groupId);
+    Groups.remove(
+      groupId
+    );
   },
-  deleteNumber: function (numbers) {
-    console.log(numbers);
-    Groups.update({}, { $pull: numbers });
-    // Groups.update(NumberId);
+  deleteNumber: function (groupId, number) {
+    //Delete number from group.
+    Groups.update(
+      groupId, 
+      { $pull: 
+        {
+          numbers: 
+          {
+            "number": number
+          }
+        }
+      }
+    );
   },
   setCheckedGroup: function (groupId, setChecked) {
-    Groups.update(groupId, { $set: { checked: setChecked} });
+    Groups.update( {_id:groupId}, { $set: { checked: setChecked} });
   },
-  // setCheckedNumber: function (number) {
-  //   console.log(number);
-  //   Groups.update({}, { $set: { number.checked: !checked} });
-  // }
+  setCheckedNumber: function (groupId, number, setChecked) {
+    Groups.update({ _id:groupId, "numbers.number":number},
+      { $set: {"numbers.$.checked": setChecked}}
+    );
+  }
 });
 
 // At the bottom of simple-todos.js

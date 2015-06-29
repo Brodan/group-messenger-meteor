@@ -7,6 +7,7 @@
   <div class="container">
     <header>
       <h1>Groups List</h1>
+      
 
       {{> loginButtons}}
 
@@ -27,32 +28,32 @@
 </body>
 
 
-<template name="group">
-    <li class="{{#if checked}}checked{{/if}} groupBox">
+  <template name="group">
+      <li class="{{#if checked}}checked{{/if}}">
 
-      <button class="delete">&times;</button>
+        <button class="delete">&times;</button>
 
-      <input type="checkbox" checked="{{checked}}" class="toggle-checked-group" />
+        <input type="checkbox" checked="{{checked}}" class="toggle-checked-group" />
 
-      <span class="text">{{name}}</span>
+        <span class="text">{{name}}</span>
 
-      <ul>
-        {{#each this.numbers}}
-          <li class="checked">
-            <button class="deleteNumber">&times;</button>
+        <ul>
+          {{#each this.numbers}}
+            <li class="checked">
+              <button class="deleteNumber">&times;</button>
 
-            <input type="checkbox" checked="{{checked}}" class="toggle-checked-number" />
+              <input type="checkbox" checked="{{checked}}" class="toggle-checked-number" />
 
-            <span class="text">{{number}}</span>
-          </li>
-        {{/each}}
-      </ul>
+              <span class="text">{{number}}</span>
+            </li>
+          {{/each}}
+        </ul>
 
-      <form class="new-number">
-        <input type="text" name="number" placeholder="Type to add a number to this group" />
-      </form>
+        <form class="new-number">
+          <input type="text" name="number" placeholder="Type to add a number to this group" />
+        </form>
 
-    </li>
-</template>
+      </li>
+  </template>
 
 
