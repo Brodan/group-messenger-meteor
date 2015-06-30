@@ -4,25 +4,19 @@
 </head>
 
 <body>
-
   <div class="container">
-
     <header>
+      {{> loginButtons}}
       <h1>Groups List</h1>
       {{#if currentUser}}
-        <button class="text-blast">TEXT</button>
-          <input id="new-message" type="text" name="message" placeholder="Type your message to send." />
-      {{/if}}
+        <button class="send">SEND</button>
+        <input id="new-message" type="text" placeholder="Enter the text to send..." />
 
-      {{> loginButtons}}
-
-      {{#if currentUser}}
-	      <form class="new-group">
-	        <input type="text" name="text" placeholder="Type to create new group" />
-	      </form>
+        <form class="new-group">
+          <input type="text" name="text" placeholder="Enter a name to create a new group..." />
+        </form>
       {{/if}}
     </header>
-
     <ul>
       {{#each groups}}
         {{> group}}
@@ -32,31 +26,22 @@
 </body>
 
 <template name="group">
-    <li class="{{#if checked}}checked{{/if}}">
+  <li>
+    <button class="delete-group">&times;</button>
+    <input type="checkbox" checked="{{checked}}" class="toggle-group" />
+    <span class="text">{{name}}</span>
+    <ul>
+      {{#each this.numbers}}
+        <li>
+          <button class="delete-number">&times;</button>
+          <input type="checkbox" checked="{{checked}}" class="toggle-number" />
+          <span class="text">{{number}}</span>
+        </li>
+      {{/each}}
+    </ul>
 
-      <button class="delete">&times;</button>
-
-      <input type="checkbox" checked="{{checked}}" class="toggle-checked-group" />
-
-      <span class="text">{{name}}</span>
-
-      <ul>
-        {{#each this.numbers}}
-          <li class="checked">
-            <button class="deleteNumber">&times;</button>
-
-            <input type="checkbox" checked="{{checked}}" class="toggle-checked-number" />
-
-            <span class="text">{{number}}</span>
-          </li>
-        {{/each}}
-      </ul>
-
-      <form class="new-number">
-        <input type="text" name="number" placeholder="Type to add a number to this group" />
-      </form>
-
-    </li>
+    <form class="new-number">
+      <input type="text" name="number" placeholder="Enter a number to add to this group..." />
+    </form>
+  </li>
 </template>
-
-

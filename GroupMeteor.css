@@ -1,4 +1,4 @@
-/* CSS declarations go here */
+/* GroupMeteor.css */
 body {
   font-family: sans-serif;
   background-color: #315481;
@@ -33,6 +33,7 @@ header {
 
 #login-buttons {
   display: block;
+  float: right;
 }
 
 h1 {
@@ -98,7 +99,7 @@ ul {
   background: white;
 }
 
-.delete {
+.delete-group {
   float: right;
   font-weight: bold;
   background: none;
@@ -107,16 +108,7 @@ ul {
   position: relative;
 }
 
-.deleteNumber {
-  float: right;
-  font-weight: bold;
-  background: none;
-  font-size: 1em;
-  border: none;
-  position: relative;
-}
-
-.add {
+.delete-number {
   float: right;
   font-weight: bold;
   background: none;
@@ -136,25 +128,8 @@ li .text {
   margin-left: 10px;
 }
 
-li.checked {
-
-}
-
-li.checked .text {
-  
-}
-
-li.private {
-  background: #eee;
-  border-color: #ddd;
-}
-
-header .hide-completed {
+.send{
   float: right;
-}
-
-.toggle-private {
-  margin-left: 5px;
 }
 
 @media (max-width: 600px) {
@@ -170,8 +145,4 @@ header .hide-completed {
   .new-task input {
     padding-bottom: 5px;
   }
-}
-
-.text-blast{
-  float: right;
 }

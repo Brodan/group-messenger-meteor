@@ -7,6 +7,7 @@ if (Meteor.isClient) {
 
     Template.body.helpers({
         groups: function () {
+            // Find all groups and list the newest groups first
             return Groups.find({}, {sort: {createdAt: -1}});
         }
     });
@@ -14,10 +15,10 @@ if (Meteor.isClient) {
     Template.body.events({
         "submit .new-group": function (event) {
             // Grab value from text field
-            var groupName = event.target.text.value;
+            var newGroup = event.target.text.value;
             // Check that text field is not blank before adding group
-            if (groupName !== '') {
-                Meteor.call("addGroup", groupName);
+            if (newGroup !== '') {
+                Meteor.call("addGroup", newGroup);
             }
             // Clear form
             event.target.text.value = "";
@@ -29,138 +30,149 @@ if (Meteor.isClient) {
             var newNumber = event.target.number.value;
             // Check that text field is not blank before adding number
             if (newNumber !== '') {
-                Meteor.call("addNumber", this, newNumber);
+                Meteor.call("addNumber", this._id, newNumber);
             }
             // Clear form
             event.target.number.value = "";
             // Prevent default form submit
             return false;
         },
-        "click .text-blast": function () {
-            var outgoingMessage = document.getElementById('new-message').value;
+        "click .send": function () {
+            // Grab value from text field
+            var newMessage = document.getElementById('new-message').value;
             // Check that text field is not blank before adding number
-            if (outgoingMessage !== '') {
-                // Meteor.call("textBlast", outgoingMessage);
+            if (newMessage !== '') {
+                Meteor.call("sendMessage", newMessage);
+                // Clear form
                 document.getElementById('new-message').value = '';
-                alert('Your messages are being sent.');
+                alert('Your message is being sent.');
             }
         }
     });
 
     Template.group.events({
-        "click .toggle-checked-group": function () {
+        "click .toggle-group": function () {
             // Set the checked property to the opposite of its current value
-            Meteor.call("setCheckedGroup", this._id, !this.checked);
+            Meteor.call("checkGroup", this._id, !this.checked);
         },
-        "click .toggle-checked-number": function () {
-            // Set the checked property to the opposite of its current value
+        "click .toggle-number": function () {
+            // Get the number's group data
             var data = Template.instance().data;
-            Meteor.call("setCheckedNumber", data._id, this.number, !this.checked);
+            // Set the checked property to the opposite of its current value
+            Meteor.call("checkNumber", data._id, this.number, !this.checked);
         },
-        "click .delete": function () {
+        "click .delete-group": function () {
             Meteor.call("deleteGroup", this._id);
         },
-        "click .deleteNumber": function () {
-            var data = Template.instance().data;
-            Meteor.call("deleteNumber", data._id, this.number);
+        "click .delete-number": function () {
+            // Get the number's group data
+            var group = Template.instance().data;
+            Meteor.call("deleteNumber", group._id, this.number);
         }
     });
-
+    // Configure Accounts to require username instead of email
     Accounts.ui.config({
         passwordSignupFields: "USERNAME_ONLY"
     });
 }
 
-Meteor.methods({
-    addGroup: function (name) {
-    // Make sure the user is logged in before creating a group
-    if (!Meteor.userId()) {
-    throw new Meteor.Error("not-authorized");
-    }
-    Groups.insert({
-    name: name,
-    createdAt: new Date(),
-    owner: Meteor.userId(),
-    username: Meteor.user().username,
-    checked: false,
-    numbers: []
-    });
-    },
-    addNumber: function (group, newNumber) {
-    // Make sure the user is logged in before adding a number
-    if (!Meteor.userId()) {
-    throw new Meteor.Error("not-authorized");
-    }
-    Groups.update(
-    {_id: group._id},
-    {$addToSet: {numbers: {"number": newNumber, "checked": true }}}
-    );
-    },
-    deleteGroup: function (groupId) {
-    Groups.remove(
-    groupId
-    );
-    },
-    deleteNumber: function (groupId, number) {
-    //Delete number from group.
-    Groups.update(
-    groupId, { $pull: { numbers: {"number": number}}}
-    );
-    },
-    setCheckedGroup: function (groupId, setChecked) {
-    Groups.update({_id: groupId}, { $set: { checked: setChecked} });
-    if (setChecked) {
-    // Set everyone number in the group to true when the group is set to true
-    // NEEDS FIX  
-    }
-    else {
-    // Set everyone number in the group to false when the group is set to false
-    // Groups.update({_id: groupId}, { $set: {"numbers.0.checked": setChecked}});
-    // NEEDS FIX
-    }
-    },
-    setCheckedNumber: function (groupId, number, setChecked) {
-    Groups.update({ _id: groupId, "numbers.number": number},
-    { $set: {"numbers.$.checked": setChecked}}
-    );
-    },
-    textBlast: function (outgoingMessage) {
-        var phonebook = [];
-        var recipients = Groups.find({owner: this.userId, numbers: { $elemMatch: {"checked": true}}});
-        recipients.forEach(function (recipient) {
-            for (var index in recipient.numbers) {
-                phonebook.push(recipient.numbers[index].number);
-            }
-        });
-        var uniqueBook = new Set(phonebook);
-        uniqueBook.forEach(function (number) {
-            HTTP.call(
-                "POST",
-                'https://api.twilio.com/2010-04-01/Accounts/AC4f2f0aabf2fbaae0d3b59ee1638f0f22/SMS/Messages.json', {
-                    params: {
-                        From: 'TWILIO NUMBER GOES HERE', // Your Twilio number here
-                        To: number,
-                        Body: outgoingMessage
-                    },
-                    auth:'ACCOUNT CREDENTIALS GO HERE' // Your credentials here
-                },
-                function (error, result) {
-                    if (!error) {
-                        console.log(result);
-                    }
-                    else {
-                        console.log(error);
-                    }
-                }
-            );
-        });
-    }
-});
-
 if (Meteor.isServer) {
-  Meteor.publish("groups", function () {
-    return Groups.find({
-        owner: this.userId
+    Meteor.publish("groups", function () {
+        return Groups.find({
+            owner: this.userId
+        });
     });
-  });
+
+    Meteor.methods({
+        addGroup: function (name) {
+            Groups.insert({
+                name: name,
+                createdAt: new Date(),
+                owner: Meteor.userId(),
+                checked: false,
+                numbers: []
+            });
+        },
+        addNumber: function (groupId, number) {
+            Groups.update(
+                {_id: groupId},
+                {$addToSet: {numbers: {"number": number, "checked": true }}}
+            );
+        },
+        deleteGroup: function (groupId) {
+            Groups.remove(
+                {_id: groupId}
+            );
+        },
+        deleteNumber: function (groupId, number) {
+            Groups.update(
+                {_id: groupId}, 
+                { $pull: { numbers: {"number": number}}}
+            );
+        },
+        checkGroup: function (groupId, isChecked) {
+            Groups.update(
+                {_id: groupId}, 
+                { $set: { checked: isChecked}}
+            );
+            if (isChecked) {
+                // Set everyone number in the group to true when the group is set to true
+                // NEEDS FIX  
+            }
+            else {
+                // Set everyone number in the group to false when the group is set to false
+                // Groups.update({_id: groupId}, { $set: {"numbers.0.checked": setChecked}});
+                // NEEDS FIX
+            }
+        },
+        checkNumber: function (groupId, number, isChecked) {
+            Groups.update(
+                { _id: groupId, "numbers.number": number }, 
+                { $set: {"numbers.$.checked": isChecked} }
+            );
+        },
+        sendMessage: function (outgoingMessage) {
+            var phonebook = [];
+            // Find all checked numbers across all groups
+            var recipients = 
+                Groups.find(
+                    {numbers: { $elemMatch: {"checked": true}}}
+                );
+            // Add each number from our query to our phonebook
+            recipients.forEach(function (recipient) {
+                for (var index in recipient.numbers) {
+                    phonebook.push(recipient.numbers[index].number);
+                }
+            });
+            // Place all numbers in a Set so no number is texted more than once
+            var uniquePhoneBook = new Set(phonebook);
+            // Use Twilio REST API to text each number in the unique phonebook
+            uniquePhoneBook.forEach(function (number) {
+                HTTP.call(
+                    "POST",
+                    'https://api.twilio.com/2010-04-01/Accounts/AC4f2f0aabf2fbaae0d3b59ee1638f0f22/SMS/Messages.json', {
+                        params: {
+                            From: process.env.TWILIO_NUMBER, // Your Twilio number. alternatively, set as environment variable
+                            To: number,
+                            Body: outgoingMessage
+                        },
+                        // Set your credentials as environment variables 
+                        // so that they are not loaded on the client
+                        auth:
+                            process.env.TWILIO_ACCOUNT_SID + ':' +
+                            process.env.TWILIO_AUTH_TOKEN
+                    },
+                    // Print error or success to console
+                    function (error) {
+                        if (error) {
+                            console.log(error);
+                        }
+                        else {
+                            console.log('SMS sent successfully.');
+                        }
+                    }
+                );
+            });
+        }
+    });
 }
