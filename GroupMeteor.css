@@ -77,6 +77,21 @@ form {
   outline: 0;
 }
 
+#new-message {
+  box-sizing: border-box;
+  padding: 10px 0;
+  background: transparent;
+  border: none;
+  width: 50%;
+  padding-right: 80px;
+  font-size: 1em;
+  float: right
+}
+
+#new-message {
+  outline: 0;
+}
+
 ul {
   margin: 0;
   padding: 0;

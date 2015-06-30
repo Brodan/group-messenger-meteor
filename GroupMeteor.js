@@ -1,4 +1,4 @@
-// simple-todos.js
+// GroupMeteor.js
 Groups = new Mongo.Collection("groups");
 
 if (Meteor.isClient) {
@@ -17,7 +17,7 @@ if (Meteor.isClient) {
       // Grab value from text field
       var groupName = event.target.text.value;
       // Check that textfield isn't empty
-      if(groupName != ''){
+      if(groupName !== ''){
         Meteor.call("addGroup", groupName);
       }
       // Clear form
@@ -29,7 +29,7 @@ if (Meteor.isClient) {
       // Grab value from text field
       var newNumber = event.target.number.value;
 
-      if(newNumber != ''){
+      if(newNumber !== ''){
         Meteor.call("addNumber", this, newNumber);
       }
       // Clear form
@@ -38,7 +38,8 @@ if (Meteor.isClient) {
       return false;
     },
     "click .text-blast": function(){
-      Meteor.call("textBlast");
+      var outgoingMessage = document.getElementById('new-message').value;
+      Meteor.call("textBlast", outgoingMessage);
     }
   });
 
@@ -88,7 +89,7 @@ Meteor.methods({
       throw new Meteor.Error("not-authorized");
     }
 
-    Groups.update({_id:group._id}, {$addToSet: {numbers: {"number":newNumber, "checked": true }}})
+    Groups.update({_id:group._id}, {$addToSet: {numbers: {"number":newNumber, "checked": true }}});
 
   },
   deleteGroup: function (groupId) {
@@ -112,22 +113,52 @@ Meteor.methods({
   },
   setCheckedGroup: function (groupId, setChecked) {
     Groups.update( {_id:groupId}, { $set: { checked: setChecked} });
+    if(setChecked){
+      // Set everyone number in the group to true when the group is set to true
+      // NEEDS FIX  
+    }
+    else{
+      // Set everyone number in the group to false when the group is set to false
+      //Groups.update({_id:groupId}, { $set: {"numbers.0.checked": setChecked}});
+      //NEEDS FIX
+    }
   },
   setCheckedNumber: function (groupId, number, setChecked) {
     Groups.update({ _id:groupId, "numbers.number":number},
       { $set: {"numbers.$.checked": setChecked}}
     );
   },
-  textBlast: function(){
+  textBlast: function(outgoingMessage){
     var phonebook = [];
     var recipients = Groups.find({owner: this.userId, numbers: { $elemMatch: {"checked": true}}});
     recipients.forEach(function(recipient){
       for(var index in recipient.numbers){
-        //console.log(recipient.numbers[number].number);
         phonebook.push(recipient.numbers[index].number);
       }
     });
-    console.log(phonebook);
+    var uniqueBook = new Set(phonebook);
+    uniqueBook.forEach(function(number){
+      HTTP.call(
+          "POST", 
+          'https://api.twilio.com/2010-04-01/Accounts/AC4f2f0aabf2fbaae0d3b59ee1638f0f22/SMS/Messages.json', 
+          { 
+              params:{
+                From: '+14152002277', 
+                To: number, 
+                Body: outgoingMessage
+              }, 
+            auth:'AC4f2f0aabf2fbaae0d3b59ee1638f0f22:df206a3847b815f8f54a379b8296e08a'
+          },
+          function (error, result) {
+            if (!error) {
+              console.log(result);
+            }
+            else{
+              console.log(error);
+            }
+          }
+      );
+    });
   }
 });
 
