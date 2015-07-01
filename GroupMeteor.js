@@ -115,15 +115,7 @@ if (Meteor.isServer) {
                 {_id: groupId}, 
                 { $set: { checked: isChecked}}
             );
-            if (isChecked) {
-                // Set everyone number in the group to true when the group is set to true
-                // NEEDS FIX  
-            }
-            else {
-                // Set everyone number in the group to false when the group is set to false
-                // Groups.update({_id: groupId}, { $set: {"numbers.0.checked": setChecked}});
-                // NEEDS FIX
-            }
+            // https://jira.mongodb.org/browse/SERVER-1243
         },
         checkNumber: function (groupId, number, isChecked) {
             Groups.update(
