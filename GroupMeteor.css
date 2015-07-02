@@ -2,7 +2,7 @@
 body {
   font-family: sans-serif;
   background-color: #315481;
-  background-image: linear-gradient(to bottom, #315481, #918e82 100%);
+  background-image: linear-gradient(to bottom, #6C0003, #F06366 100%);
   background-attachment: fixed;
 
   position: absolute;
@@ -25,8 +25,7 @@ body {
 }
 
 header {
-  background: #d2edf4;
-  background-image: linear-gradient(to bottom, #d0edf5, #e1e5f0 100%);
+  background: #F06367;
   padding: 20px 15px 15px 15px;
   position: relative;
 }
@@ -42,6 +41,11 @@ h1 {
   margin-bottom: 10px;
   display: inline-block;
   margin-right: 1em;
+  color: #FFFFFF;
+}
+
+.bold{
+  font-weight: bold;
 }
 
 form {

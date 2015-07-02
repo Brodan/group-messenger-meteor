@@ -115,27 +115,38 @@ if (Meteor.isServer) {
                 {_id: groupId}, 
                 { $set: { checked: isChecked}}
             );
+            // If group is being checked
             if (isChecked) {
                 // Set every number in the group to true
-                var falseNumbers = 
+                var uncheckedNumbers = 
                     Groups.find(
                         {numbers: { $elemMatch: {"checked": false}}}
                     );
-                
-                falseNumbers.forEach(function (falsey) {
+                // Set each unchecked number to checked
+                uncheckedNumbers.forEach(function (falsey) {
                     for (var index in falsey.numbers) {
-                        //console.log(falsey.numbers[index].number);
                         Groups.update(
                             { _id: groupId, "numbers.number": falsey.numbers[index].number }, 
                             { $set: {"numbers.$.checked": true} }
                         );
                     }
                 });
-                // https://jira.mongodb.org/browse/SERVER-1243
             }
+            // If group is being unchecked
             else {
-                // Set every number in the group to false 
-                // https://jira.mongodb.org/browse/SERVER-1243
+                var checkedNumbers = 
+                    Groups.find(
+                        {numbers: { $elemMatch: {"checked": true}}}
+                    );
+                // Set each checked number to unchecked
+                checkedNumbers.forEach(function (truthy) {
+                    for (var index in truthy.numbers) {
+                        Groups.update(
+                            { _id: groupId, "numbers.number": truthy.numbers[index].number }, 
+                            { $set: {"numbers.$.checked": false} }
+                        );
+                    }
+                });
             }
         },
         checkNumber: function (groupId, number, isChecked) {
