@@ -116,11 +116,25 @@ if (Meteor.isServer) {
                 { $set: { checked: isChecked}}
             );
             if (isChecked) {
-                // Set everyone number in the group to true when the group is set to true
+                // Set every number in the group to true
+                var falseNumbers = 
+                    Groups.find(
+                        {numbers: { $elemMatch: {"checked": false}}}
+                    );
+                
+                falseNumbers.forEach(function (falsey) {
+                    for (var index in falsey.numbers) {
+                        //console.log(falsey.numbers[index].number);
+                        Groups.update(
+                            { _id: groupId, "numbers.number": falsey.numbers[index].number }, 
+                            { $set: {"numbers.$.checked": true} }
+                        );
+                    }
+                });
                 // https://jira.mongodb.org/browse/SERVER-1243
             }
             else {
-                // Set everyone number in the group to false when the group is set to false
+                // Set every number in the group to false 
                 // https://jira.mongodb.org/browse/SERVER-1243
             }
         },
