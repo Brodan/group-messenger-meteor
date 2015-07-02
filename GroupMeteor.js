@@ -2,7 +2,7 @@
 Groups = new Mongo.Collection("groups");
 
 if (Meteor.isClient) {
-
+    // Specify which collections from the server the client subscribes to
     Meteor.subscribe("groups");
 
     Template.body.helpers({
@@ -14,37 +14,38 @@ if (Meteor.isClient) {
 
     Template.body.events({
         "submit .new-group": function (event) {
-            // Grab value from text field
+            // Grab group name from text field
             var newGroup = event.target.text.value;
             // Check that text field is not blank before adding group
             if (newGroup !== '') {
                 Meteor.call("addGroup", newGroup);
             }
-            // Clear form
+            // Clear the text field for next entry
             event.target.text.value = "";
             // Prevent default form submit
             return false;
         },
         "submit .new-number": function (event) {
-            // Grab value from text field
+            // Grab phone number from text field
             var newNumber = event.target.number.value;
             // Check that text field is not blank before adding number
             if (newNumber !== '') {
                 Meteor.call("addNumber", this._id, newNumber);
             }
-            // Clear form
+            // Clear the text field for next entry
             event.target.number.value = "";
             // Prevent default form submit
             return false;
         },
         "click .send": function () {
-            // Grab value from text field
+            // Grab text message from text field
             var newMessage = document.getElementById('new-message').value;
-            // Check that text field is not blank before adding number
+            // Check that message field is not blank before sending texts
             if (newMessage !== '') {
                 Meteor.call("sendMessage", newMessage);
-                // Clear form
+                // Clear the text field
                 document.getElementById('new-message').value = '';
+                // Send an alert to prevent double-clicking the send button
                 alert('Your message is being sent.');
             }
         }
@@ -62,11 +63,13 @@ if (Meteor.isClient) {
             Meteor.call("checkNumber", data._id, this.number, !this.checked);
         },
         "click .delete-group": function () {
+            // Remove a group from our collection
             Meteor.call("deleteGroup", this._id);
         },
         "click .delete-number": function () {
             // Get the number's group data
             var group = Template.instance().data;
+            // Remove a number from a particular group
             Meteor.call("deleteNumber", group._id, this.number);
         }
     });
@@ -77,6 +80,7 @@ if (Meteor.isClient) {
 }
 
 if (Meteor.isServer) {
+    // Specify which collections are sent to the client
     Meteor.publish("groups", function () {
         return Groups.find({
             owner: this.userId
@@ -176,7 +180,7 @@ if (Meteor.isServer) {
                     "POST",
                     'https://api.twilio.com/2010-04-01/Accounts/AC4f2f0aabf2fbaae0d3b59ee1638f0f22/SMS/Messages.json', {
                         params: {
-                            From: process.env.TWILIO_NUMBER, // Your Twilio number. alternatively, set as environment variable
+                            From: process.env.TWILIO_NUMBER, // Your Twilio number. Use environment variable
                             To: number,
                             Body: outgoingMessage
                         },
