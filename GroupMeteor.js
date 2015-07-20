@@ -178,7 +178,7 @@ if (Meteor.isServer) {
             uniquePhoneBook.forEach(function (number) {
                 HTTP.call(
                     "POST",
-                    'https://api.twilio.com/2010-04-01/Accounts/AC4f2f0aabf2fbaae0d3b59ee1638f0f22/SMS/Messages.json', {
+                    'https://api.twilio.com/2010-04-01/Accounts/TWILIO_ACCOUNT_SID/SMS/Messages.json', {
                         params: {
                             From: process.env.TWILIO_NUMBER, // Your Twilio number. Use environment variable
                             To: number,
