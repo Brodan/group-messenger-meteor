@@ -15,7 +15,7 @@ if (Meteor.isClient) {
     Template.body.events({
         "submit .new-group": function (event) {
             // Grab group name from text field
-            var newGroup = event.target.text.value;
+            var newGroup = event.target.newName.value;
             // Check that text field is not blank before adding group
             if (newGroup !== '') {
                 Meteor.call("addGroup", newGroup);
@@ -178,7 +178,8 @@ if (Meteor.isServer) {
             uniquePhoneBook.forEach(function (number) {
                 HTTP.call(
                     "POST",
-                    'https://api.twilio.com/2010-04-01/Accounts/AC4f2f0aabf2fbaae0d3b59ee1638f0f22/SMS/Messages.json', {
+                    'https://api.twilio.com/2010-04-01/Accounts/' + 
+                    process.env.TWILIO_ACCOUNT_SID + '/SMS/Messages.json', {
                         params: {
                             From: process.env.TWILIO_NUMBER, // Your Twilio number. Use environment variable
                             To: number,
