@@ -15,13 +15,13 @@ if (Meteor.isClient) {
     Template.body.events({
         "submit .new-group": function (event) {
             // Grab group name from text field
-            var newGroup = event.target.newName.value;
+            var newGroup = event.target.group.value;
             // Check that text field is not blank before adding group
             if (newGroup !== '') {
                 Meteor.call("addGroup", newGroup);
             }
             // Clear the text field for next entry
-            event.target.text.value = "";
+            event.target.group.value = "";
             // Prevent default form submit
             return false;
         },
