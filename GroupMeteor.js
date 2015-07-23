@@ -37,17 +37,18 @@ if (Meteor.isClient) {
             // Prevent default form submit
             return false;
         },
-        "click .send": function () {
+        "submit .new-text": function (event) {
             // Grab text message from text field
-            var newMessage = document.getElementById('new-message').value;
+            var newMessage = event.target.message.value;
             // Check that message field is not blank before sending texts
             if (newMessage !== '') {
                 Meteor.call("sendMessage", newMessage);
-                // Clear the text field
-                document.getElementById('new-message').value = '';
-                // Send an alert to prevent double-clicking the send button
-                alert('Your message is being sent.');
             }
+            // Clear the text field
+            event.target.message.value = "";
+            alert('Your message is being sent!');
+            // Prevent default form submit
+            return false;
         }
     });
 

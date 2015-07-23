@@ -82,18 +82,17 @@ form {
   outline: 0;
 }
 
-#new-message {
+.new-text input {
   box-sizing: border-box;
   padding: 10px 0;
   background: transparent;
   border: none;
-  width: 50%;
+  width: 100%;
   padding-right: 80px;
   font-size: 1em;
-  float: right
 }
 
-#new-message {
+.new-text input:focus{
   outline: 0;
 }
 
@@ -132,18 +131,9 @@ li .text {
   margin-left: 10px;
 }
 
-.send{
-  float: right;
-}
-
 @media (max-width: 600px) {
   li {
     padding: 12px 15px;
-  }
-
-  .search {
-    width: 150px;
-    clear: both;
   }
 
   .new-task input {

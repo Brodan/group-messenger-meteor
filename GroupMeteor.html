@@ -7,10 +7,10 @@
   <div class="container">
     <header>
       {{> loginButtons}}
-      <h1>Groups List</h1>
       {{#if currentUser}}
-        <button class="send">SEND</button>
-        <input id="new-message" type="text" placeholder="Enter the text to send..." />
+        <form class="new-text">
+          <input type="text" name="message" placeholder="Enter the text to send..." />
+        </form>
 
         <form class="new-group">
           <input type="text" name="group" placeholder="Enter a name to create a new group..." />
