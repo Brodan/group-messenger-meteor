@@ -115,44 +115,25 @@ if (Meteor.isServer) {
                 { $pull: { numbers: {"number": number}}}
             );
         },
-        checkGroup: function (groupId, isChecked) {
+        checkGroup: function (groupId, selector) {
             Groups.update(
                 {_id: groupId}, 
-                { $set: { checked: isChecked}}
+                { $set: { checked: selector}}
             );
-            // If group is being checked
-            if (isChecked) {
-                // Set every number in the group to true
-                var uncheckedNumbers = 
-                    Groups.find(
-                        {numbers: { $elemMatch: {"checked": false}}}
+            // Find every number that differs from Group's "checked" boolean
+            var numbers = 
+                Groups.find(
+                    {numbers: { $elemMatch: {"checked": !selector}}}
+                );
+            // Set all numbers to match Group's "checked" boolean
+            numbers.forEach(function (setter) {
+                for (var index in setter.numbers) {
+                    Groups.update(
+                        { _id: groupId, "numbers.number": setter.numbers[index].number }, 
+                        { $set: {"numbers.$.checked": selector} }
                     );
-                // Set each unchecked number to checked
-                uncheckedNumbers.forEach(function (falsey) {
-                    for (var index in falsey.numbers) {
-                        Groups.update(
-                            { _id: groupId, "numbers.number": falsey.numbers[index].number }, 
-                            { $set: {"numbers.$.checked": true} }
-                        );
-                    }
-                });
-            }
-            // If group is being unchecked
-            else {
-                var checkedNumbers = 
-                    Groups.find(
-                        {numbers: { $elemMatch: {"checked": true}}}
-                    );
-                // Set each checked number to unchecked
-                checkedNumbers.forEach(function (truthy) {
-                    for (var index in truthy.numbers) {
-                        Groups.update(
-                            { _id: groupId, "numbers.number": truthy.numbers[index].number }, 
-                            { $set: {"numbers.$.checked": false} }
-                        );
-                    }
-                });
-            }
+                }
+            });
         },
         checkNumber: function (groupId, number, isChecked) {
             Groups.update(
