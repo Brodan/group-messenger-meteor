@@ -55,13 +55,13 @@ if (Meteor.isClient) {
     Template.group.events({
         "click .toggle-group": function () {
             // Set the checked property to the opposite of its current value
-            Meteor.call("checkGroup", this._id, !this.checked);
+            Meteor.call("toggleGroup", this._id, !this.checked);
         },
         "click .toggle-number": function () {
             // Get the number's group data
             var data = Template.instance().data;
             // Set the checked property to the opposite of its current value
-            Meteor.call("checkNumber", data._id, this.number, !this.checked);
+            Meteor.call("toggleNumber", data._id, this.number, !this.checked);
         },
         "click .delete-group": function () {
             // Remove a group from our collection
@@ -115,30 +115,30 @@ if (Meteor.isServer) {
                 { $pull: { numbers: {"number": number}}}
             );
         },
-        checkGroup: function (groupId, selector) {
+        toggleGroup: function (groupId, toggle) {
             Groups.update(
                 {_id: groupId}, 
-                { $set: { checked: selector}}
+                { $set: { checked: toggle}}
             );
             // Find every number that differs from Group's "checked" boolean
             var numbers = 
                 Groups.find(
-                    {numbers: { $elemMatch: {"checked": !selector}}}
+                    {numbers: { $elemMatch: {"checked": !toggle}}}
                 );
             // Set all numbers to match Group's "checked" boolean
             numbers.forEach(function (setter) {
                 for (var index in setter.numbers) {
                     Groups.update(
                         { _id: groupId, "numbers.number": setter.numbers[index].number }, 
-                        { $set: {"numbers.$.checked": selector} }
+                        { $set: {"numbers.$.checked": toggle} }
                     );
                 }
             });
         },
-        checkNumber: function (groupId, number, isChecked) {
+        toggleNumber: function (groupId, number, toggle) {
             Groups.update(
                 { _id: groupId, "numbers.number": number }, 
-                { $set: {"numbers.$.checked": isChecked} }
+                { $set: {"numbers.$.checked": toggle} }
             );
         },
         sendMessage: function (outgoingMessage) {
